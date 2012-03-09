@@ -76,6 +76,12 @@ def main(args):
 # 	theResult, thePath = commands.getstatusoutput('which momc')
 # 	if theResult == 0:
 # 		theDefaultMomcPath = thePath
+	
+	# Ask xcrun where momc is
+	if not theDefaultMomcPath:
+		theResult, thePath = commands.getstatusoutput('xcrun -find momc')
+		if theResult == 0:
+			theDefaultMomcPath = thePath
 
 	# If still no momc then look in the known places.
 	if not theDefaultMomcPath:
@@ -134,6 +140,10 @@ def emogenerator(options, inArguments):
 	if options.input == None:
 		raise Exception('Could not find a data model file.')
 
+	# Sanitize input directories with a trailing slash
+	if options.input[-1] == '/':
+		options.input = options.input[:-1]
+
 	# If we still don't have an input file we need to bail.
 	if not os.path.exists(options.input):
 		raise Exception('Input file doesnt exist at %s' % options.input)
@@ -141,8 +151,6 @@ def emogenerator(options, inArguments):
 	logger.info('Using \'%s\'' % options.input)
 
 	options.input_type = os.path.splitext(options.input)[1][1:]
-	if options.input_type[-1] == '/':
-		options.input_type = options.input_type[:-1]
 	if options.input_type not in ['mom', 'xcdatamodel', 'xcdatamodeld']:
 		raise Exception('Input file is not a .mom or a .xcdatamodel. Why are you trying to trick me?')
 
